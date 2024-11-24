@@ -1,0 +1,72 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Tweet {
+  id: Int!
+  content: String!
+  userId: Int!
+  user: User!
+}
+
+type User {
+  id: Int!
+  email: String!
+  password: String!
+  name: String!
+  age: Int
+  phoneNumber: String
+  tweet: [Tweet!]
+}
+
+type Query {
+  getAllUser: [User!]!
+  getUserById(id: Int!): User!
+  user(name: String!): User!
+  getAllTweet: [Tweet!]!
+  getAllTweetOfUser: [Tweet!]!
+  tweet(id: Int!): Tweet!
+  listFollowers: [User!]!
+  listFollowing: [User!]!
+}
+
+type Mutation {
+  updateUser(updateUserInput: UpdateUserInput!): User!
+  removeUser(id: Int!): User!
+  createTweet(createTweetInput: CreateTweetInput!): Tweet!
+  updateTweet(updateTweetInput: UpdateTweetInput!): Tweet!
+  removeTweet(id: Int!): Tweet!
+  followUser(createFollowDto: FollowingDto!): Boolean!
+  register(createAuthInput: CreateUserInput!): User!
+  login(email: String!, password: String!): User!
+}
+
+input UpdateUserInput {
+  email: String
+  password: String
+  name: String
+  age: Int
+  phoneNumber: String
+}
+
+input CreateTweetInput {
+  content: String!
+  userId: Int!
+}
+
+input UpdateTweetInput {
+  content: String
+  userId: Int
+}
+
+input FollowingDto {
+  followingId: Int!
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  name: String!
+  age: Int!
+  phoneNumber: String!
+}
