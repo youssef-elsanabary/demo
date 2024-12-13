@@ -1,24 +1,20 @@
 /* eslint-disable prettier/prettier */
 import { Resolver, Mutation, Args} from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { CreateUserInput } from 'src/user/dto/create-user.input';
-import { User } from 'src/user/entities/user.entity';
+import { CreateUserInput, UserResponseModel } from 'src/user/dto/create-user.input';
+import { CreateAuthInput } from './dto/create-auth.input';
 
-@Resolver(() => User)
+@Resolver(() => UserResponseModel)
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
-  @Mutation(() => User)
+  @Mutation(() => UserResponseModel)
   register(@Args('createAuthInput') createAuthInput: CreateUserInput) {
-    // console.log("Auth Resolver : "+createAuthInput.email);
     return this.authService.register(createAuthInput);
   }
 
-  @Mutation(()=>User)
-  login(@Args('email') email:string ,@Args('password') password:string){
-    const user = this.authService.validateUser(email,password);
-    // console.log("Auth Resolver Login :" + user);
-    
-    return this.authService.login(user);
+  @Mutation(()=>UserResponseModel)
+  login(@Args('authDto') authDto : CreateAuthInput){
+    return this.authService.login(authDto)
   }
 }

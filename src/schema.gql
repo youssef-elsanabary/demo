@@ -17,28 +17,54 @@ type User {
   age: Int
   phoneNumber: String
   tweet: [Tweet!]
+  followers: [User!]
+  following: [User!]
+}
+
+type UserResponseModel {
+  statusCode: Int
+  massege: String
+  token: String
+  data: User
+  allData: [User!]
+}
+
+type TweetResponseModel {
+  statusCode: Int
+  massege: String
+  data: Tweet
+  allData: [Tweet!]
+}
+
+type FollowResponseModel {
+  statusCode: Int!
+  message: String!
+  followers: [User!]
+  following: [User!]
 }
 
 type Query {
-  getAllUser: [User!]!
-  getUserById(id: Int!): User!
-  user(name: String!): User!
-  getAllTweet: [Tweet!]!
-  getAllTweetOfUser: [Tweet!]!
-  tweet(id: Int!): Tweet!
-  listFollowers: [User!]!
-  listFollowing: [User!]!
+  getAllUser: UserResponseModel!
+  getUserById(id: Int!): UserResponseModel!
+  getUserByName(name: String!): UserResponseModel!
+  getUserByEmail(email: String!): UserResponseModel!
+  getAllTweet: TweetResponseModel!
+  getAllTweetOfUser(userId: Int!): TweetResponseModel!
+  tweet(id: Int!): TweetResponseModel!
+  getAllFollowers(userId: Int!): FollowResponseModel!
+  getAllFollowing(userId: Int!): FollowResponseModel!
 }
 
 type Mutation {
-  updateUser(updateUserInput: UpdateUserInput!): User!
-  removeUser(id: Int!): User!
-  createTweet(createTweetInput: CreateTweetInput!): Tweet!
-  updateTweet(updateTweetInput: UpdateTweetInput!): Tweet!
-  removeTweet(id: Int!): Tweet!
-  followUser(createFollowDto: FollowingDto!): Boolean!
-  register(createAuthInput: CreateUserInput!): User!
-  login(email: String!, password: String!): User!
+  updateUser(updateUserInput: UpdateUserInput!): UserResponseModel!
+  removeUser(id: Int!): UserResponseModel!
+  createTweet(createTweetInput: CreateTweetInput!): TweetResponseModel!
+  updateTweet(updateTweetInput: UpdateTweetInput!): TweetResponseModel!
+  removeTweet(id: Int!): TweetResponseModel!
+  followUser(followerId: Float!, followingId: Float!): FollowResponseModel!
+  unfollowUser(followerId: Float!, followingId: Float!): FollowResponseModel!
+  register(createAuthInput: CreateUserInput!): UserResponseModel!
+  login(authDto: CreateAuthInput!): UserResponseModel!
 }
 
 input UpdateUserInput {
@@ -59,14 +85,15 @@ input UpdateTweetInput {
   userId: Int
 }
 
-input FollowingDto {
-  followingId: Int!
-}
-
 input CreateUserInput {
   email: String!
   password: String!
   name: String!
   age: Int!
   phoneNumber: String!
+}
+
+input CreateAuthInput {
+  email: String!
+  password: String!
 }

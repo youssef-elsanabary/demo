@@ -1,36 +1,39 @@
 /* eslint-disable prettier/prettier */
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { FollowService } from './follow.service';
-import { Follow } from './entities/follow.entity';
-import { FollowingDto } from './dto/create-follow.input';
+import {  FollowResponseModel } from './dto/create-follow.input';
 import { UseGuards } from '@nestjs/common';
-import { User } from 'src/user/entities/user.entity';
 import { JwtAuthGuard } from 'src/_guard/jwt-auth-guard.guard';
 
-  @UseGuards(JwtAuthGuard)
-  @Resolver(() => Follow)
+@UseGuards(JwtAuthGuard)
+@Resolver(() => FollowResponseModel)
 export class FollowResolver {
   constructor(private readonly followService: FollowService) {}
 
-  @Mutation(() => Boolean)
+  @Mutation(() => FollowResponseModel)
   async followUser(
-    @Args('createFollowDto') createFollowDto: FollowingDto,
-    @Context() context,
-  ): Promise<boolean> {
-    const user = context.req.user;
-    await this.followService.follow(user.id, createFollowDto);
-    return true;
+    @Args('followerId') followerId: number,
+    @Args('followingId') followingId: number
+  ){
+    return await this.followService.follow(followingId,followerId)
   }
  
-  @Query(() => [User])
-  async listFollowers(@Context() context){
-    const user = context.req.user;
-    return this.followService.getFollowers(user.id);
+  @Mutation(()=>FollowResponseModel)
+  async unfollowUser(
+    @Args('followerId') followerId: number,
+    @Args('followingId') followingId: number
+  ){
+    return await this.followService.unfollow(followingId,followerId)
+  }
+  @Query(() => FollowResponseModel)
+  async getAllFollowers(@Args('userId',{type: () => Int}) userId : number){
+    // const user = context.req.user;
+    return this.followService.getFollowers(userId);
   }
   
-  @Query(() => [User])
-  async listFollowing(@Context() context) {
-    const user = context.req.user;
-    return this.followService.getFollowing(user.id);
+  @Query(() => FollowResponseModel)
+  async getAllFollowing(@Args('userId',{type: () => Int}) userId : number) {
+    // const user = context.req.user;
+    return this.followService.getFollowing(userId);
   }
 }

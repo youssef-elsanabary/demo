@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/_Jwt/JwtPayload';
-import { CreateUserInput } from 'src/user/dto/create-user.input';
+import { CreateUserInput, UserResponseModel } from 'src/user/dto/create-user.input';
 import * as bcrypt from 'bcrypt';
-
+import { CreateAuthInput } from './dto/create-auth.input';
 
 @Injectable()
 export class AuthService {
@@ -14,29 +14,39 @@ export class AuthService {
     private readonly jwtService :JwtService
   ){}
 
-  async register(createUserDto: CreateUserInput) {
-    console.log("auth service 111 : "+ createUserDto.email);
+  async register(createUserDto: CreateUserInput): Promise<UserResponseModel> {
     const user = await this.userService.create(createUserDto);
-    // console.log("Auth Service : "+user.email);
-     const payload: JwtPayload = { email: user.email };
-      return { access_token: this.jwtService.sign(payload), 
-      }; 
+    const payload: JwtPayload = { email: user.email , id : user.id};
+    const token = this.jwtService.sign(payload); 
+      return {
+        statusCode : 201, 
+        massege : "User Created Successfully",
+        token : token,
+        data : user
+      }
      } 
 
  async validateUser(email: string, pass: string){
     const user = await this.userService.getUserByEmail(email);
-    console.log("Validate User :" + user.age);
-     
-    if (user && await bcrypt.compare(pass, user.password )) {
-        // const result = user;
-        // console.log("result :" + user.email);
-         return user;
-       }
-         return null; 
+    if (user && await bcrypt.compare(pass, user.data.password )) {
+         return user.data
+       }else{
+        throw new UnauthorizedException('Email or password not valid')
+       } 
        } 
 
- async login(user: any) {
-    const payload: JwtPayload = { email: user.email };
-     return { access_token: this.jwtService.sign(payload), };
+ async login(authDto : CreateAuthInput): Promise<UserResponseModel> {
+  const {email , password} = authDto;
+  const user = await this.validateUser(email,password);
+  if(user){
+    const payload: JwtPayload = { email: user.email , id : user.id};
+    const token = this.jwtService.sign(payload) ;
+     return {
+      statusCode : 201,
+      massege : " Successfull Login",
+      token : token,
+      data : user
+     }
+    }
     }
 }

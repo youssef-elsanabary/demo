@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { AutoIncrement, Column, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { AutoIncrement,BelongsToMany, Column, HasMany, Model, PrimaryKey, Table } from 'sequelize-typescript';
+import { Follow } from 'src/follow/entities/follow.entity';
 import { Tweet } from 'src/tweet/entities/tweet.entity';
 
 @ObjectType()
@@ -36,4 +37,12 @@ export class User extends Model <User>{
   @Field(()=>[Tweet] ,{nullable : true})
   @HasMany(()=>Tweet)
   tweet : [Tweet]
+
+  @Field(()=>[User],{nullable : true})
+  @BelongsToMany(()=>User,()=>Follow ,'followingId' ,'followerId')
+  followers? : User[]
+  
+  @Field(()=>[User],{nullable:true})
+  @BelongsToMany(()=>User,()=>Follow ,'followerId' ,'followingId')
+  following? : User[]
 }

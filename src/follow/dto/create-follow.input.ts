@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { InputType, Int, Field } from '@nestjs/graphql';
+import { InputType, Int, Field, ObjectType } from '@nestjs/graphql';
+import { User } from 'src/user/entities/user.entity';
 
 @InputType()
 export class FollowingDto {
@@ -7,3 +8,19 @@ export class FollowingDto {
   followingId : number;
 }
  
+@ObjectType()
+export class FollowResponseModel {
+   @Field(() => Int) 
+   statusCode: number; 
+   
+   @Field() 
+   massege: string; 
+   
+  //  @Field({ nullable: true }) 
+  //  data?: any; // Adjust according to the context, e.g., a boolean or a user array 
+   
+   @Field(() => [User], { nullable: true }) 
+   followers?: User[]; 
+   
+   @Field(() => [User], { nullable: true }) 
+   following?: User[]; }

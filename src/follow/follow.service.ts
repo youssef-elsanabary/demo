@@ -1,9 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Follow } from './entities/follow.entity';
 import { User } from 'src/user/entities/user.entity';
-import { FollowingDto } from './dto/create-follow.input';
 
 @Injectable()
 export class FollowService {
@@ -11,26 +10,47 @@ export class FollowService {
     @InjectModel(Follow) private followModel : typeof Follow ,
     @InjectModel(User) private userModel : typeof User
   ){}
-  async follow(userId: number, followingDto : FollowingDto) {
-    const {followingId} = followingDto;
-    return this.followModel.create({ followerId : userId, followingId });
+  async follow(followerId : number , followingId : number) {
+    await this.followModel.create({ followerId , followingId });
+    return{
+      statusCode : 201,
+      massege : "follow"
+    }
   }
 
+  async unfollow(followerId : number , followingId : number){
+    await this.followModel.destroy({where : {followerId , followingId}})
+    return {
+      statusCode : 201,
+      massege : "unfollow"
+    }
+  }
+  
   async getFollowers(userId: number) {
-    const followers = await this.followModel.findAll({
-      where : {followingId : userId},
-      include : [this.userModel]
-    });
-    return followers.map(follow => follow.getDataValue('followerId'));
-    // return this.followModel.findAll({ where: { followingId: userId } });
+    const user = await this.userModel.findByPk(userId , {include :{ model : User ,as : 'followers'}})
+    if(user){
+      return {
+        statusCode : 201,
+        massege : "user followers",
+        followers :  user.followers
+      }
+    }
+    else{
+      return NotFoundException
+    }
   }
 
   async getFollowing(userId: number) {
-    const following = await this.followModel.findAll({
-      where :{followerId : userId},
-      include : [this.userModel]
-    })
-    return following.map(follow=>follow.getDataValue('followingId'))
-    // return this.followModel.findAll({ where: { followerId: userId } });
+    const user = await this.userModel.findByPk(userId , {include :{model : User ,as : 'following'}})
+    if(user){
+      return {
+        statusCode : 201,
+        massege : "user following",
+        following : user.following
+      }
+    }
+    else{
+      return NotFoundException
+    }
   }
 }
